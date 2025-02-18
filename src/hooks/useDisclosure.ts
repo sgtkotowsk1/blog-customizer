@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type UseDisclosureProps = {
 	initialState: boolean;
@@ -6,31 +6,30 @@ type UseDisclosureProps = {
 	onClose?: () => void;
 };
 
-const useDisclosure = ({
-	initialState,
-	onOpen,
-	onClose,
-}: UseDisclosureProps) => {
+const useDisclosure = ({ initialState }: UseDisclosureProps) => {
 	const [isOpen, setIsOpen] = useState<boolean>(initialState);
+	const ref = useRef<HTMLElement | null>(null);
 
-	useLayoutEffect(() => {
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (isOpen && ref.current && !ref.current.contains(event.target as Node))
+				setIsOpen(false);
+		};
+		document.addEventListener('mousedown', handleClickOutside, true);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside, true);
+		};
+	}, [isOpen]);
+
+	useEffect(() => {
 		setIsOpen(initialState);
 	}, [initialState]);
 
-	const toggle = useCallback(() => {
-		console.log('Кнопка нажата');
-		setIsOpen((prevState) => {
-			const newState = !prevState;
-			if (newState) {
-				onOpen?.();
-			} else {
-				onClose?.();
-			}
-			return newState;
-		});
-	}, [onOpen, onClose]);
+	const toggle = () => {
+		setIsOpen((prev) => !prev);
+	};
 
-	return { isOpen, toggle };
+	return { isOpen, toggle, ref };
 };
 
 export default useDisclosure;
