@@ -14,9 +14,11 @@ import {
 	fontSizeOptions,
 	OptionType,
 } from 'src/constants/articleProps';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
+import { useClose } from 'src/hooks/useClose';
 
 type ArticleParamsFormProps = {
 	onOptionChange: (option: ArticleStateType) => void;
@@ -25,8 +27,16 @@ type ArticleParamsFormProps = {
 export const ArticleParamsForm = ({
 	onOptionChange,
 }: ArticleParamsFormProps) => {
-	const { isOpen, toggle, ref } = useDisclosure({ initialState: false });
+	const { isOpen, toggle } = useDisclosure({ initialState: false });
 	const [option, setOption] = useState<ArticleStateType>(defaultArticleState);
+
+	const formRef = useRef<HTMLDivElement>(null);
+
+	useClose({
+		isOpen: isOpen,
+		onClose: toggle,
+		rootRef: formRef,
+	});
 
 	const handleFontChange = (selectedOption: OptionType) => {
 		setOption((prev) => ({
@@ -76,12 +86,14 @@ export const ArticleParamsForm = ({
 	};
 
 	return (
-		<div>
+		<div ref={formRef}>
 			<ArrowButton isOpen={isOpen} onClick={toggle} />
 			<aside
-				ref={ref}
 				className={clsx(styles.container, isOpen && styles.container_open)}>
 				<form className={styles.form} onSubmit={onCommit}>
+					<Text as='h2' size={31} weight={800} uppercase>
+						Задайте параметры
+					</Text>
 					<Select
 						options={fontFamilyOptions}
 						selected={option.fontFamilyOption}
@@ -116,13 +128,13 @@ export const ArticleParamsForm = ({
 					/>
 
 					<div className={styles.bottomContainer}>
-						<Button title='Применить' htmlType='submit' type='apply' />
 						<Button
 							title='Сбросить'
 							htmlType='reset'
 							type='clear'
 							onClick={onCancel}
 						/>
+						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
 			</aside>
