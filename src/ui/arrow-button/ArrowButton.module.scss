@@ -1,6 +1,7 @@
 .container {
 	position: fixed;
 	top: 31px;
+	left: 0;
 	display: flex;
 	flex-shrink: 0;
 	justify-content: center;
@@ -15,6 +16,7 @@
 
 .container:hover {
 	background-color: #ffc802;
+	cursor: pointer;
 }
 
 .container:active {
